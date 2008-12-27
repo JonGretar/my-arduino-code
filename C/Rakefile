@@ -6,6 +6,7 @@ CLOBBER.include('*.hex')
 ARDUINO = "/Applications/Electronics/arduino-0012"
 F_CPU = "16000000"
 MMCU = "atmega168"
+SERIAL = "/dev/tty.usbserial-A60061eR"
 
 # No more changes
 
@@ -19,18 +20,32 @@ task :default => [:all]
 
 
 rule '.elf' => '.c' do |t|
-    puts "Compiling #{t.name}"
+    puts " => [avr-gcc] #{t.name}"
     sh "avr-gcc #{CFLAGS} -o #{t.name} #{t.source}  -L. core.a -lm"
 end
 
 rule '.hex' => '.elf' do |t|
-    puts "Object Copy: #{t.name}"
+    puts " => [avr-objcopy] #{t.name}"
     sh "avr-objcopy -O ihex -R .eeprom #{t.source} #{t.name}"
 end
 
+desc "Build all Modules"
 task :all => MODULES 
 
+desc "Upload module (USAGE: 'rake module.hex upload')"
+task :upload do |t|
+    if (ARGV[0] == "upload") then
+        puts "USAGE: 'rake module.hex upload'"
+    else
+        Rake::Task[ARGV[0]]
+        puts " => [avrdude] #{ARGV[0]}"
+        sh "avrdude -p m168 -P #{SERIAL} -c stk500v1 -b 19200 -F -u -U flash:w:#{ARGV[0]}"
+    end
+    
+    
+end
 
+desc "Build the core.a file for linking"
 task :bootstrap do
     sh "avr-gcc -M -mmcu=#{MMCU} -DF_CPU=#{F_CPU} -I#{ARDUINO}/hardware/cores/arduino -I#{ARDUINO}/hardware/libraries/SoftwareSerial \
         #{ARDUINO}/hardware/cores/arduino/pins_arduino.c \
