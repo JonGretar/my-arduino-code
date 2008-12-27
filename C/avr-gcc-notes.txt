@@ -1,0 +1,39 @@
+A Few dotted down notes for using AVR-GCC
+
+## Links
+http://javiervalcarce.es/wiki/Program_Arduino_with_AVR-GCC
+file:///usr/local/AVRMacPack-20080721/doc/avr-libc/group__demo__project.html
+
+## NEW
+avr-gcc -mmcu=atmega168 -I. -gstabs -DF_CPU=16000000 -Os -Wall -Wstrict-prototypes -std=gnu99  -o ledarray.elf ledarray.c -L. core.a -lm -I/Applications/Electronics/arduino-core-0011
+avr-objcopy -O ihex -R .eeprom ledarray.elf ledarray.hex
+avrdude -p m168 -P /dev/tty.usbserial-A60061eR -c stk500v1 -b 19200 -F -u -U flash:w:ledarray.hex
+
+
+## OLD 
+avr-gcc -g -Os -DF_CPU=16000000 -mmcu=atmega168 -c ledarray.c
+avr-gcc -g -mmcu=atmega168 -o ledarray.elf ledarray.o 
+avr-objcopy -j .text -j .data -O ihex ledarray.elf ledarray.hex
+avrdude -p m168 -P /dev/tty.usbserial-A60061eR -c stk500v1 -b 19200 -F -u -U flash:w:ledarray.hex
+
+
+
+## RAD Output
+avr-gcc -M -mmcu=atmega168 -DF_CPU=16000000 -I$ARD12/hardware/cores/arduino -I$ARD12/hardware/libraries/SoftwareSerial $ARD12/hardware/cores/arduino/pins_arduino.c $ARD12/hardware/cores/arduino/wiring.c $ARD12/hardware/cores/arduino/wiring_analog.c $ARD12/hardware/cores/arduino/wiring_digital.c $ARD12/hardware/cores/arduino/wiring_pulse.c $ARD12/hardware/cores/arduino/wiring_serial.c $ARD12/hardware/cores/arduino/wiring_shift.c $ARD12/hardware/cores/arduino/WInterrupts.c   
+>> Makefile
+
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/pins_arduino.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/wiring.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/wiring_analog.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/wiring_digital.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/wiring_pulse.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/wiring_serial.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/wiring_shift.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/WInterrupts.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/HardwareSerial.o
+avr-ar rcs core.a $ARD12/hardware/libraries/SoftwareSerial/SoftwareSerial.o
+avr-ar rcs core.a $ARD12/hardware/cores/arduino/Print.o
+
+avr-gcc -mmcu=atmega168 -I. -gstabs -DF_CPU=16000000 -I$ARD12/hardware/cores/arduino -I$ARD12/hardware/libraries/SoftwareSerial -Os -Wall -Wstrict-prototypes -std=gnu99  -o RadTest.elf RadTest.cpp -L. core.a -lm
+
+avr-objcopy -O ihex -R .eeprom RadTest.elf RadTest.hex

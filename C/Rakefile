@@ -1,0 +1,55 @@
+require 'rake/clean'
+CLEAN.include('*.elf')
+CLOBBER.include('*.hex')
+
+# Configuration
+ARDUINO = "/Applications/Electronics/arduino-0012"
+F_CPU = "16000000"
+MMCU = "atmega168"
+
+# No more changes
+
+SRC = FileList['*.c']
+OBJ = SRC.ext('elf')
+MODULES = SRC.ext('hex')
+
+CFLAGS = "-mmcu=#{MMCU} -I. -gstabs -DF_CPU=#{F_CPU} -Os -Wall -Wstrict-prototypes -std=gnu99 -I#{ARDUINO}/hardware/cores/arduino -I#{ARDUINO}/hardware/libraries/SoftwareSerial"
+
+task :default => [:all]
+
+
+rule '.elf' => '.c' do |t|
+    puts "Compiling #{t.name}"
+    sh "avr-gcc #{CFLAGS} -o #{t.name} #{t.source}  -L. core.a -lm"
+end
+
+rule '.hex' => '.elf' do |t|
+    puts "Object Copy: #{t.name}"
+    sh "avr-objcopy -O ihex -R .eeprom #{t.source} #{t.name}"
+end
+
+task :all => MODULES 
+
+
+task :bootstrap do
+    sh "avr-gcc -M -mmcu=#{MMCU} -DF_CPU=#{F_CPU} -I#{ARDUINO}/hardware/cores/arduino -I#{ARDUINO}/hardware/libraries/SoftwareSerial \
+        #{ARDUINO}/hardware/cores/arduino/pins_arduino.c \
+        #{ARDUINO}/hardware/cores/arduino/wiring.c \
+        #{ARDUINO}/hardware/cores/arduino/wiring_analog.c \
+        #{ARDUINO}/hardware/cores/arduino/wiring_digital.c \
+        #{ARDUINO}/hardware/cores/arduino/wiring_pulse.c \
+        #{ARDUINO}/hardware/cores/arduino/wiring_serial.c \
+        #{ARDUINO}/hardware/cores/arduino/wiring_shift.c \
+        #{ARDUINO}/hardware/cores/arduino/WInterrupts.c"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/pins_arduino.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/wiring.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/wiring_analog.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/wiring_digital.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/wiring_pulse.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/wiring_serial.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/wiring_shift.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/WInterrupts.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/HardwareSerial.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/libraries/SoftwareSerial/SoftwareSerial.o"
+    sh "avr-ar rcs core.a #{ARDUINO}/hardware/cores/arduino/Print.o"
+end
