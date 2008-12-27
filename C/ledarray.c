@@ -13,47 +13,46 @@ int state = LOW;      // the current state of the output pin
 
 int flashleds(void);
 
-int main (void)
+int main (void) 
 {
-    int i;
-    pinMode(inPin, INPUT);
-
-    for (i = 0; i < num_pins; i++)   // the array elements are numbered from 0 to num_pins - 1
-        pinMode(pins[i], OUTPUT);      // set each pin as an output
+  pinMode(inPin, INPUT);  // set inPin as the input
+  
+  int i;
+  for (i = 0; i < num_pins; i++)   // the array elements are numbered from 0 to num_pins - 1
+    pinMode(pins[i], OUTPUT);      // set each pin as an output
     
-    flashleds(); // Flash once on startup
+  flashleds(); // Flash once on startup
 
-    while (1)
-    {
-        // Flash LED if button is pushed
-        state = digitalRead(inPin);
-        if (state == LOW) {
-            digitalWrite(ledPin, HIGH);  // turn LED ON
-            flashleds();
-        }
-        else {
-            digitalWrite(ledPin, LOW);  // turn LED OFF
-        }
+  while (1) { 
+    // Flash LED if button is pushed
+    state = digitalRead(inPin);  //
+    if (state == LOW) {
+      digitalWrite(ledPin, HIGH);  // turn ledPin on to say we have activity
+      flashleds();  // Flash the LEDs
     }
-
-    return 1;
+    else {
+      digitalWrite(ledPin, LOW);  // turn ledPin off to say we are done
+    }
+  }
+  
+  return 1;
 }
 
 
 int flashleds(void)
 {
-    int i;
-    for (i = 0; i < num_pins; i++) { // loop through each pin...
-        digitalWrite(pins[i], HIGH);   // turning it on,
-        _delay_ms(100);                  // pausing,
-        digitalWrite(pins[i], LOW);    // and turning it off.
-    }
-
-    for (i = num_pins - 1; i >= 0; i--) { 
-        digitalWrite(pins[i], HIGH);
-        _delay_ms(100);
-        digitalWrite(pins[i], LOW);
-    }
-    return 1;
+  int i;
+  for (i = 0; i < num_pins; i++) { // loop through each pin...
+    digitalWrite(pins[i], HIGH);   // turning it on,
+    _delay_ms(timer);                  // pausing,
+    digitalWrite(pins[i], LOW);    // and turning it off.
+  }
+  // And again in reverse
+  for (i = num_pins - 1; i >= 0; i--) { 
+    digitalWrite(pins[i], HIGH);
+    _delay_ms(timer);
+    digitalWrite(pins[i], LOW);
+  }
+  return 1;
 }
 
