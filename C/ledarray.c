@@ -3,12 +3,12 @@
 #include <util/delay.h>
 
 int timer = 100;                   // The higher the number, the slower the timing.
-int pins[] = { 2, 3, 4, 5, 6 }; // an array of pin numbers
+int pins[] = { 8, 9, 10, 11, 12 }; // an array of pin numbers
 int num_pins = 5;                  // the number of pins (i.e. the length of the array)
 int ledPin = 13;   // choose the pin for the LED
 
 // Switch
-int inPin = 10;         // the number of the input pin
+int inPin = 2;         // the number of the input pin
 int state = LOW;      // the current state of the output pin
 
 int flashleds(void);
