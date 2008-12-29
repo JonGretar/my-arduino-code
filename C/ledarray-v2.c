@@ -5,11 +5,10 @@
 int timer = 100;                   // The higher the number, the slower the timing.
 int pins[] = { 8, 9, 10, 11, 12 }; // an array of pin numbers
 int num_pins = 5;                  // the number of pins (i.e. the length of the array)
-int ledPin = 13;   // choose the pin for the LED
 
 // Switch
-int state = 1;      // the current state of the output pin
-volatile int change_state = LOW;
+int state = 1;      // the current state of the LED loop.
+volatile int change_state = LOW; // Has the interrupt been activated
 
 int leds_off(void);
 int leds_on(void);
@@ -20,7 +19,9 @@ void got_interrupt(void);
 
 int main (void) 
 {
-  attachInterrupt(0, got_interrupt, CHANGE);
+  init();  // Arduino Init
+    
+  attachInterrupt(0, got_interrupt, RISING);  // Attach got_interrupt() to interrupt 0 (pin2)
 
   int i;
   for (i = 0; i < num_pins; i++)   // the array elements are numbered from 0 to num_pins - 1
@@ -29,12 +30,14 @@ int main (void)
   leds_flash(); // Flash once on startup
 
   while (1) { 
-
+    
+    // If change_state has been activated by got_interrupt() change the LED mode
     if (change_state == HIGH) {
       change_mode();
-      change_state = LOW;
+      change_state = LOW;  // Set it back to LOW
     }   
 
+    // Do the correct LED trick according to our mode
     switch (state) {
     case 0:
       leds_off();
@@ -56,12 +59,13 @@ int main (void)
 
 void got_interrupt(void)
 {
-  change_state = HIGH;
+  change_state = HIGH;  // Set change_state so we change_mode() next loop.
 }
 
 
 int change_mode(void)
 {
+  // Cycle the modes
   if (state == 3) 
     state = 0;
   else
