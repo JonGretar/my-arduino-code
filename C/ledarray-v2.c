@@ -9,7 +9,7 @@ int ledPin = 13;   // choose the pin for the LED
 
 // Switch
 int state = 1;      // the current state of the output pin
-volatile int change_state = HIGH;
+volatile int change_state = LOW;
 
 int leds_off(void);
 int leds_on(void);
@@ -27,7 +27,6 @@ int main (void)
     pinMode(pins[i], OUTPUT);      // set each pin as an output
     
   leds_flash(); // Flash once on startup
-
 
   while (1) { 
 

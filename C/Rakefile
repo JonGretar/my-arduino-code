@@ -10,27 +10,36 @@ SERIAL = "/dev/tty.usbserial-A60061eR"
 
 # No more changes
 
-SRC = FileList['*.c']
-OBJ = SRC.ext('elf')
-MODULES = SRC.ext('hex')
+C_SRC = FileList['*.c']
+ELF = C_SRC.ext('elf')
+HEX = C_SRC.ext('hex')
 
-CFLAGS = "-mmcu=#{MMCU} -I. -gstabs -DF_CPU=#{F_CPU} -Os -Wall -Wstrict-prototypes -std=gnu99 -I#{ARDUINO}/hardware/cores/arduino -I#{ARDUINO}/hardware/libraries/SoftwareSerial"
+# COMMANDS
+AVR_TOOLS_PATH = "#{ARDUINO}/hardware/tools/avr/bin"
+AVR_GCC = "#{AVR_TOOLS_PATH}/avr-gcc"
+AVR_OBJCOPY = "#{AVR_TOOLS_PATH}/avr-objcopy"
+AVR_DUDE = "#{AVR_TOOLS_PATH}/avrdude"
+
+# FLAGS
+CWARN = "-Wall -Wstrict-prototypes"
+CTUNING = "-funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums"
+CFLAGS = "-mmcu=#{MMCU} #{CTUNING} -I. -gstabs -DF_CPU=#{F_CPU} -Os #{CWARN} -std=gnu99 -I#{ARDUINO}/hardware/cores/arduino"
 
 task :default => [:all]
 
 
 rule '.elf' => '.c' do |t|
     puts " => [avr-gcc] #{t.name}"
-    sh "avr-gcc #{CFLAGS} -o #{t.name} #{t.source}  -L. core.a -lm"
+    sh "#{AVR_GCC} #{CFLAGS} -o #{t.name} #{t.source}  -L. core.a -lm"
 end
 
 rule '.hex' => '.elf' do |t|
     puts " => [avr-objcopy] #{t.name}"
-    sh "avr-objcopy -O ihex -R .eeprom #{t.source} #{t.name}"
+    sh "#{AVR_OBJCOPY} -O ihex -R .eeprom #{t.source} #{t.name}"
 end
 
 desc "Build all Modules"
-task :all => MODULES 
+task :all => HEX 
 
 desc "Upload module (USAGE: 'rake module.hex upload')"
 task :upload do |t|
@@ -39,7 +48,7 @@ task :upload do |t|
     else
         Rake::Task[ARGV[0]]
         puts " => [avrdude] #{ARGV[0]}"
-        sh "avrdude -p m168 -P #{SERIAL} -c stk500v1 -b 19200 -F -u -U flash:w:#{ARGV[0]}"
+        sh "#{AVR_DUDE} -p #{MMCU} -P #{SERIAL} -C #{ARDUINO}/hardware/tools/avr/etc/avrdude.conf -c stk500v1 -b 19200 -F -u -U flash:w:#{ARGV[0]}"
     end
     
     
